@@ -1,0 +1,11 @@
+Beschreibung der Daten von "http://www.farys.org/daten/ebay.dta"
+
+sold: Ob das Mobiltelefon verkauft wurde
+price: Der erzielte Verkauftspreis
+sprice: Der Startpreis der Auktion
+sepos: Anzahl positiver Bewertungen des Verkäufers
+seneg: Anzahl negativer Bewertungen des Verkäufers
+subcat: Das Modell des Mobiltelefons
+listpic: Kategorialer Indikator, ob die Auktion ein Thumbnail, ein "has-picture-icon" oder kein Thumbnail hat.
+listbold: Dummy, ob die Auktion fettgedruckt gelistet ist
+sehasme: Dummy, ob der Verkäufer eine "Me-page" hat oder nicht
