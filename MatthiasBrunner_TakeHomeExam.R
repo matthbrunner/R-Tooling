@@ -12,13 +12,21 @@
 # 
 # ---
 
+rm(list = ls())
 # Hinzufuegen von Library
 library(foreign)
 library(dplyr)
+library(data.table)
+library(magrittr)
+library(ggplot2)
+library(stringr)
+library(broom)
 
 # Laden Sie die Daten http://www.farys.org/daten/ebay.dta. Es handelt sich um 
 # Ebaydaten von Mobiltelefonauktionen.
 ebay <- read.dta("http://www.farys.org/daten/ebay.dta")
+
+ebay_df <- read.dta("http://www.farys.org/daten/ebay.dta") %>% as.data.table()
 
 # Speichern der Daten lokal
 # write.dta(ebay, "C:/Workspace/Weiterbildung/Tooling Und Datenmanagement/TakeHomeExame/Daten/ebay.dta")
@@ -44,26 +52,23 @@ pricing <- ebay %>%
 
 View(pricing)
 
+library(xlsx)
+write.xlsx(pricing, "c:/temp/pricing.xlsx")
+write.xlsx(ebay, "c:/temp/ebay.xlsx")
+
 # 3.
 # Bilden Sie zudem eine Variable makellos (TRUE/FALSE), ob der Verkäufer ein 
 # makelloses Rating (>98% positive Bewertungen) hat oder nicht.
-# pricing <- ebay %>%
-#   select(model = subcat,
-#          price = price,
-#          feedback_p = sepos,
-#          feedback_n = seneg) %>%
-#   mutate(rating = ebay$sepos - ebay$seneg) %>%
-#   mutate(per = rating/ebay$sepos) %>% 
-#   mutate(makellos = ifelse((rating/ebay$sepos) > 0.98, TRUE, FALSE)) %>% 
-#   filter(ebay$sepos >= 12, !is.na(price)) %>% 
-#   arrange(model, desc(rating))
 pricing <- ebay %>%
   select(model = subcat,
          price = price) %>%
   mutate(rating = ebay$sepos - ebay$seneg) %>%
   mutate(makellos = ifelse((rating/ebay$sepos) > 0.98, TRUE, FALSE)) %>% 
+  mutate(categorie = str_replace(model, "\\ \\(\\d+\\)", "")) %>% 
   filter(ebay$sepos >= 12, !is.na(price)) %>% 
   arrange(model, desc(rating))
+
+pricing[order(pricing$categorie),]
 
 # 4.
 # Zeichnen Sie einen farblich geschichteten Boxplot: Y-Achse=Preis, 
@@ -72,9 +77,38 @@ pricing <- ebay %>%
 # "Roger Bivand" im Helpfile zu boxplot(). Exportieren Sie die Grafik als PDF. 
 # Erzielen (rein optisch) die Verkäufer mit makellosem Rating einen höheren 
 # Verkaufspreis?
-?boxplot
+# Variante 1:
+boxplot(pricing$price ~ pricing$categorie,
+        boxwex = 0.25, at = 1:7 - 0.2,
+        data = pricing,
+        subset = pricing$makellos == TRUE,
+        main = "Mobile phone",
+        col = "green",
+        xlim = c(0.5, 7.5), 
+        ylim = c(50, 400),
+        yaxs = "i",
+        ylab = "Price",
+        las=3,
+        yaxt = "n"
+        )
+boxplot(pricing$price ~ pricing$categorie,
+        boxwex = 0.25, at = 1:7 + 0.2,
+        data = pricing,
+        subset = pricing$makellos == FALSE,
+        col = "red",
+        add = TRUE,
+        xaxt = "n"
+        )
+legend(5.5, 350, c("TRUE", "FALSE"),
+       fill = c("green", "red") 
+       )
 
-boxplot(pricing$price ~ pricing$model)
+# Variante 2:
+ggplot(pricing, aes(x = pricing$model, y = pricing$price))+
+  geom_boxplot()
+
+
+
 
 
 
