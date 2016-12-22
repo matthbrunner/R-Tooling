@@ -25,7 +25,7 @@ library(broom)
 # Laden Sie die Daten http://www.farys.org/daten/ebay.dta. Es handelt sich um 
 # Ebaydaten von Mobiltelefonauktionen.
 ebay <- read.dta("http://www.farys.org/daten/ebay.dta")
-
+ebay <- droplevels(ebay)
 ebay_df <- read.dta("http://www.farys.org/daten/ebay.dta") %>% as.data.table()
 
 # Speichern der Daten lokal
@@ -77,7 +77,8 @@ pricing[order(pricing$categorie),]
 # "Roger Bivand" im Helpfile zu boxplot(). Exportieren Sie die Grafik als PDF. 
 # Erzielen (rein optisch) die Verkäufer mit makellosem Rating einen höheren 
 # Verkaufspreis?
-# Variante 1:
+# Variante 1 (basis plot):
+pdf("mobile_phone.pdf")
 boxplot(pricing$price ~ pricing$categorie,
         boxwex = 0.25, at = 1:7 - 0.2,
         data = pricing,
@@ -102,11 +103,24 @@ boxplot(pricing$price ~ pricing$categorie,
 legend(5.5, 350, c("TRUE", "FALSE"),
        fill = c("green", "red") 
        )
+par(cex.axis=0.6)
+dev.off()
 
-# Variante 2:
-ggplot(pricing, aes(x = pricing$model, y = pricing$price))+
-  geom_boxplot()
+# Variante 2 (ggplot):
+library(ggplot2)
+ggplot(pricing, aes(x = categorie, y = price))+
+  geom_boxplot(aes(fill = makellos), position = position_dodge(0.8))+
+  scale_fill_manual(values = c("green", "red"), name = "Makellos") +
+  labs(x = "Kategorie", y="Preis")+
+  ggtitle("Mobile phone")+
+  #theme_classic()
+  theme(legend.position=c(.9, .85),
+        axis.text=element_text(size=6))
 
+# Speichern des Plots mit ggsave
+ggsave("mobile.pdf")
+
+# Antwort: Es ist keine signifikante Unterschied zwischen festzustellen!
 
 
 
