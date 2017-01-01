@@ -13,6 +13,7 @@
 # ---
 
 rm(list = ls())
+
 # Hinzufuegen von Library
 library(foreign)
 library(dplyr)
@@ -21,11 +22,15 @@ library(magrittr)
 library(ggplot2)
 library(stringr)
 library(broom)
+library(xlsx)
+library(stargazer)
 
-# Laden Sie die Daten http://www.farys.org/daten/ebay.dta. Es handelt sich um 
+# 22 Take-Home-Exam:
+
+# 22.1 Ebay-Auktionen
+# 1. Laden Sie die Daten http://www.farys.org/daten/ebay.dta. Es handelt sich um 
 # Ebaydaten von Mobiltelefonauktionen.
 ebay <- read.dta("http://www.farys.org/daten/ebay.dta")
-ebay <- droplevels(ebay)
 ebay_df <- read.dta("http://www.farys.org/daten/ebay.dta") %>% as.data.table()
 
 # Speichern der Daten lokal
@@ -35,6 +40,12 @@ ebay_df <- read.dta("http://www.farys.org/daten/ebay.dta") %>% as.data.table()
 ebay <- read.dta("C:/Workspace/Weiterbildung/Tooling Und Datenmanagement/TakeHomeExam/Daten/ebay.dta")
 # Betrachten der Daten
 View(ebay)
+
+# Speichern der Daten in Excel um Levels zu überprüfen!
+# write.xlsx(pricing, "c:/temp/pricing.xlsx")
+# write.xlsx(ebay, "c:/temp/ebay.xlsx")
+# Löschen der überflüssigen Levels!
+ebay <- droplevels(ebay)
 
 # 2. 
 # Sie interessieren sich dafür, ob Mobiltelefone bei Auktionen einen höheren 
@@ -50,11 +61,7 @@ pricing <- ebay %>%
   filter(ebay$sepos >= 12, !is.na(price)) %>% 
   arrange(model, desc(rating))
 
-View(pricing)
-
-library(xlsx)
-write.xlsx(pricing, "c:/temp/pricing.xlsx")
-write.xlsx(ebay, "c:/temp/ebay.xlsx")
+head(pricing)
 
 # 3.
 # Bilden Sie zudem eine Variable makellos (TRUE/FALSE), ob der Verkäufer ein 
@@ -62,13 +69,11 @@ write.xlsx(ebay, "c:/temp/ebay.xlsx")
 pricing <- ebay %>%
   select(model = subcat,
          price = price) %>%
-  mutate(rating = ebay$sepos - ebay$seneg) %>%
-  mutate(makellos = ifelse((rating/ebay$sepos) > 0.98, TRUE, FALSE)) %>% 
+  mutate(rating = (ebay$sepos - ebay$seneg)/ebay$sepos) %>%
+  mutate(makellos = ifelse((rating) > 0.98, TRUE, FALSE)) %>% 
   mutate(categorie = str_replace(model, "\\ \\(\\d+\\)", "")) %>% 
   filter(ebay$sepos >= 12, !is.na(price)) %>% 
   arrange(model, desc(rating))
-
-pricing[order(pricing$categorie),]
 
 # 4.
 # Zeichnen Sie einen farblich geschichteten Boxplot: Y-Achse=Preis, 
@@ -78,7 +83,7 @@ pricing[order(pricing$categorie),]
 # Erzielen (rein optisch) die Verkäufer mit makellosem Rating einen höheren 
 # Verkaufspreis?
 # Variante 1 (basis plot):
-pdf("mobile_phone.pdf")
+pdf("mobile_v1.pdf")
 boxplot(pricing$price ~ pricing$categorie,
         boxwex = 0.25, at = 1:7 - 0.2,
         data = pricing,
@@ -107,7 +112,6 @@ par(cex.axis=0.6)
 dev.off()
 
 # Variante 2 (ggplot):
-library(ggplot2)
 ggplot(pricing, aes(x = categorie, y = price))+
   geom_boxplot(aes(fill = makellos), position = position_dodge(0.8))+
   scale_fill_manual(values = c("green", "red"), name = "Makellos") +
@@ -118,11 +122,60 @@ ggplot(pricing, aes(x = categorie, y = price))+
         axis.text=element_text(size=6))
 
 # Speichern des Plots mit ggsave
-ggsave("mobile.pdf")
+ggsave("mobile_v2.pdf")
 
 # Antwort: Es ist keine signifikante Unterschied zwischen festzustellen!
 
+# 5. Rechnen Sie zwei kleine Regressionsmodelle für den Preis von verkauften 
+# Geräten. 
 
+
+
+
+# DataFrame umbauen damit die das Attribut listpic mit verarbeitet werden kann.
+pricing <- ebay %>%
+  select(model = subcat,
+         price = price,
+         listpic = listpic,
+         pos = sepos,
+         neg = seneg) %>%
+  mutate(rating = (ebay$sepos - ebay$seneg)/ebay$sepos) %>%
+  mutate(makellos = ifelse((rating) > 0.98, TRUE, FALSE)) %>% 
+  mutate(categorie = str_replace(model, "\\ \\(\\d+\\)", "")) %>%
+  filter(ebay$sepos >= 12, !is.na(price)) %>% 
+  arrange(model, desc(rating))
+
+# Modell 1 soll als Prädiktoren den Modelltyp und das Rating beinhalten.   
+model.1 <- lm(price ~ categorie + rating, data = pricing)
+summary(model.1)
+coef(model.1)
+
+
+# Modell 2 soll zusätzlich die Variable listpic beinhalten.
+model.2 <- lm(price ~ categorie + rating + listpic, data = pricing)
+summary(model.2)
+coef(model.2)
+
+# Haben das Rating und die Thumbnails einen Einfluss auf den Verkaufspreis? 
+# Antwort: Ja, die Verkaufspreise beeinflussen den verkaufspreis mit dem
+#          Koeffizienzintervall von 6.73 
+
+# Exportieren Sie eine Regressionstabelle, die beide Modelle beinhaltet.
+stargazer(model.1, model.2, type = "html", out = "model.htm")
+
+# 22.2 Webscraping / Tidying
+
+# Betrachten Sie den Wikipedia-Eintrag zum Klima in Bern: 
+# https://de.wikipedia.org/wiki/Bern#Klima. Lesen Sie die Tabelle "Monatliche
+# Durchschnittstemperaturen und -niederschläge für Bern 1981-2010" ein.
+# Verwenden Sie hierfür die Tools aus dem Kapitel "Datenimport aus HTML/XML"",
+# z.B. das Package rvest.
+
+
+# Konzentrieren Sie sich auf die ersten drei Zeilen 
+# (Monat, Max. Temperatur, Min. Temperatur) und säubern Sie die Daten 
+# (vgl. Kapitel 15.1.), um auf folgende (oder hübschere) Tabelle zu kommen:
+  
 
 
 
