@@ -3,9 +3,9 @@
 # 
 # @author: Matthias Brunner
 # 
-# @summary:
+# @summary: TakeHomeExam für das Modul Tooling und Datenmanagement
 # 
-# @version: 0.1
+# @version: 1.0
 # 
 # @change:
 # 
@@ -24,6 +24,7 @@ library(stringr)
 library(broom)
 library(xlsx)
 library(stargazer)
+library(rvest)
 
 # 22 Take-Home-Exam:
 
@@ -130,8 +131,6 @@ ggsave("mobile_v2.pdf")
 # Geräten. 
 
 
-
-
 # DataFrame umbauen damit die das Attribut listpic mit verarbeitet werden kann.
 pricing <- ebay %>%
   select(model = subcat,
@@ -161,7 +160,7 @@ coef(model.2)
 #          Koeffizienzintervall von 6.73 
 
 # Exportieren Sie eine Regressionstabelle, die beide Modelle beinhaltet.
-stargazer(model.1, model.2, type = "html", out = "model.htm")
+stargazer(model.1, model.2, type = "html", style = "qje", out = "model.htm")
 
 # 22.2 Webscraping / Tidying
 
@@ -170,12 +169,42 @@ stargazer(model.1, model.2, type = "html", out = "model.htm")
 # Durchschnittstemperaturen und -niederschläge für Bern 1981-2010" ein.
 # Verwenden Sie hierfür die Tools aus dem Kapitel "Datenimport aus HTML/XML"",
 # z.B. das Package rvest.
-
+roh<-read_html(url)
+tabelle <- html_table(roh, fill = TRUE, header = TRUE)[[6]]
 
 # Konzentrieren Sie sich auf die ersten drei Zeilen 
 # (Monat, Max. Temperatur, Min. Temperatur) und säubern Sie die Daten 
 # (vgl. Kapitel 15.1.), um auf folgende (oder hübschere) Tabelle zu kommen:
-  
+
+# filtern der benötigten Daten
+tabelle.short <- tabelle[1:2,2:13]
+# Dezimaltrennzeichen von "," auf "." ändern.
+swap <- lapply(tabelle.short, gsub, pattern = ",", replacement = ".", fixed = TRUE)
+
+# Formatieren jedes einzelnen Werten mit 3 Nachkommastellen.
+swap <- as.data.frame(lapply(swap, function(.col){
+     if (is.numeric(as.numeric(as.character(.col)))) 
+       return(sprintf("%.3f", as.numeric(as.character(.col))))
+     else return(.col)
+ }))
+
+# Drehen der Daten
+swap <- t(swap)
+
+# rownames in Kolonne abfüllen
+swap <- cbind(Row.Names = rownames(swap), swap)
+# Löschen der rownames
+rownames(swap) <- NULL
+# Kolonnennamen vergeben
+colnames(swap) <- c("Monat", "Min", "Max")
+# Ausgeben der Tabelle mit Stargazer
+stargazer(swap, 
+          type = "html", 
+          style = "qje",
+          rownames = TRUE,
+          title = "Monatliche Durchschnittstemperaturen und -niederschläge für Bern 1981-2010",
+          out = "Temperatur.htm")
+
 
 
 
