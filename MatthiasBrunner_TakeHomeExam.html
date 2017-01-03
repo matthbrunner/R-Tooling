@@ -295,6 +295,7 @@ ggplot(pricing, aes(x = categorie, y = price))+
 </ul>
 <pre class="r"><code># Speichern des Plots mit ggsave
 ggsave(&quot;mobil_v2.pdf&quot;)</code></pre>
+<pre><code>## Saving 7 x 5 in image</code></pre>
 <p>Erzielen (rein optisch) die Verkäufer mit makellosem Rating einen höheren Verkaufspreis?</p>
 <pre class="r"><code># Antwort: Es ist keine signifikante Unterschied zwischen festzustellen!</code></pre>
 <ol start="5" style="list-style-type: decimal">
@@ -814,7 +815,7 @@ swap &lt;- cbind(Row.Names = rownames(swap), swap)
 # Löschen der rownames
 rownames(swap) &lt;- NULL
 # Kolonnennamen vergeben
-colnames(swap) &lt;- c(&quot;Monat&quot;, &quot;Min&quot;, &quot;Max&quot;)</code></pre>
+colnames(swap) &lt;- c(&quot;Monat&quot;, &quot;Max&quot;, &quot;Min&quot;)</code></pre>
 <pre class="r"><code># Ausgeben der Tabelle mit Stargazer
 stargazer(swap, 
           type = &quot;html&quot;, 
@@ -837,10 +838,10 @@ stargazer(swap,
 Monat
 </td>
 <td>
-Min
+Max
 </td>
 <td>
-Max
+Min
 </td>
 </tr>
 <tr>

@@ -162,7 +162,7 @@ ggplot(pricing, aes(x = categorie, y = price))+
 ```
 
 - Speichern des GGPLOT mit ggsave
-```{r ggsave, eval=FALSE}
+```{r ggsave, eval=TRUE}
 # Speichern des Plots mit ggsave
 ggsave("mobil_v2.pdf")
 ```
