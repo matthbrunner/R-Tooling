@@ -35,7 +35,7 @@ ebay <- read.dta("http://www.farys.org/daten/ebay.dta")
 # write.dta(ebay, "C:/Workspace/Weiterbildung/Tooling Und Datenmanagement/TakeHomeExame/Daten/ebay.dta")
 
 # Laden der Lokalen daten
-ebay <- read.dta("C:/Workspace/Weiterbildung/Tooling Und Datenmanagement/TakeHomeExam/Daten/ebay.dta")
+# ebay <- read.dta("C:/Workspace/Weiterbildung/Tooling Und Datenmanagement/TakeHomeExam/Daten/ebay.dta")
 # Betrachten der Daten
 View(ebay)
 
@@ -72,6 +72,8 @@ pricing <- ebay %>%
   mutate(categorie = str_replace(model, "\\ \\(\\d+\\)", "")) %>% 
   filter(ebay$sepos >= 12, !is.na(price)) %>% 
   arrange(model, desc(rating))
+
+head(pricing)
 
 # 4.
 # Zeichnen Sie einen farblich geschichteten Boxplot: Y-Achse=Preis, 
@@ -194,7 +196,7 @@ swap <- cbind(Row.Names = rownames(swap), swap)
 # Löschen der rownames
 rownames(swap) <- NULL
 # Kolonnennamen vergeben
-colnames(swap) <- c("Monat", "Min", "Max")
+colnames(swap) <- c("Monat", "Max", "Min")
 # Ausgeben der Tabelle mit Stargazer
 stargazer(swap, 
           type = "html", 

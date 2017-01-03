@@ -201,7 +201,16 @@ pricing &lt;- ebay %&gt;%
   mutate(makellos = ifelse((rating) &gt; 0.98, TRUE, FALSE)) %&gt;% 
   mutate(categorie = str_replace(model, &quot;\\ \\(\\d+\\)&quot;, &quot;&quot;)) %&gt;% 
   filter(ebay$sepos &gt;= 12, !is.na(price)) %&gt;% 
-  arrange(model, desc(rating))</code></pre>
+  arrange(model, desc(rating))
+
+head(pricing)</code></pre>
+<pre><code>##           model  price rating makellos categorie
+## 1 Sony T610 (1)  76.00      1     TRUE Sony T610
+## 2 Sony T610 (1) 125.00      1     TRUE Sony T610
+## 3 Sony T610 (1) 118.00      1     TRUE Sony T610
+## 4 Sony T610 (1) 127.45      1     TRUE Sony T610
+## 5 Sony T610 (1) 120.00      1     TRUE Sony T610
+## 6 Sony T610 (1) 120.00      1     TRUE Sony T610</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Zeichnen Sie einen farblich geschichteten Boxplot: Y-Achse=Preis, X-Achse=Gerätetyp, farblich geschichtet nach Bewertung (makellos=grün sonst=rot). Orientieren Sie sich z.B. am Vorschlag von “Roger Bivand” im Helpfile zu boxplot(). Exportieren Sie die Grafik als PDF.</li>
 </ol>
@@ -371,10 +380,23 @@ summary(model.2)</code></pre>
 <ul>
 <li>Exportieren Sie eine Regressionstabelle, die beide Modelle beinhaltet.</li>
 </ul>
-<pre class="r"><code>stargazer(model.1, model.2, type = &quot;html&quot;, style = &quot;qje&quot;, out = &quot;model.htm&quot;)</code></pre>
+<pre class="r"><code>stargazer(model.1, model.2, type = &quot;html&quot;, style = &quot;default&quot;, out = &quot;model.htm&quot;)</code></pre>
 <table style="text-align:center">
 <tr>
 <td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="2" style="border-bottom: 1px solid black">
 </td>
 </tr>
 <tr>
@@ -685,8 +707,12 @@ Constant
 </td>
 </tr>
 <tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
 <td style="text-align:left">
-<em>N</em>
+Observations
 </td>
 <td>
 4,216
@@ -745,24 +771,10 @@ F Statistic
 </tr>
 <tr>
 <td style="text-align:left">
-<em>Notes:</em>
+<em>Note:</em>
 </td>
 <td colspan="2" style="text-align:right">
-<sup>***</sup>Significant at the 1 percent level.
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td colspan="2" style="text-align:right">
-<sup>**</sup>Significant at the 5 percent level.
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td colspan="2" style="text-align:right">
-<sup>*</sup>Significant at the 10 percent level.
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
 </td>
 </tr>
 </table>

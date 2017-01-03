@@ -76,6 +76,8 @@ pricing <- ebay %>%
   mutate(categorie = str_replace(model, "\\ \\(\\d+\\)", "")) %>% 
   filter(ebay$sepos >= 12, !is.na(price)) %>% 
   arrange(model, desc(rating))
+
+head(pricing)
 ```
 
 4. Zeichnen Sie einen farblich geschichteten Boxplot: Y-Achse=Preis, 
@@ -206,7 +208,7 @@ summary(model.2)
 
 - Exportieren Sie eine Regressionstabelle, die beide Modelle beinhaltet.
 ```{r, results='asis' }
-stargazer(model.1, model.2, type = "html", style = "qje", out = "model.htm")
+stargazer(model.1, model.2, type = "html", style = "default", out = "model.htm")
 ```
 
 ## 22.2 Webscraping / Tidying
@@ -249,7 +251,7 @@ swap <- cbind(Row.Names = rownames(swap), swap)
 # Löschen der rownames
 rownames(swap) <- NULL
 # Kolonnennamen vergeben
-colnames(swap) <- c("Monat", "Min", "Max")
+colnames(swap) <- c("Monat", "Max", "Min")
 ```
 
 ```{r , results='asis'}
